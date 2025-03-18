@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace translitor
@@ -25,8 +19,19 @@ namespace translitor
             notifyIcon.Visible = true;
 
             // регистрация глобальной комбинации клавиш
+
             FormClosing += (s, e) => { UnregisterHotKey(Handle, HOTKEY_ID); };
-            RegisterHotKey(Handle, HOTKEY_ID, MOD_ALT | MOD_SHIFT, (int)Keys.P);
+            SetDefaultHotkeySettings();
+            LoadHotkeySettings();
+        }
+        private void SetDefaultHotkeySettings()
+        {
+            if (Properties.Settings.Default.Modifiers == 0 && Properties.Settings.Default.Key == 0)
+            {
+                Properties.Settings.Default.Modifiers = (int)(Keys.Shift | Keys.Alt);
+                Properties.Settings.Default.Key = (int)Keys.P;
+                Properties.Settings.Default.Save();
+            }
         }
 
         #region комбинации клавиш
@@ -35,12 +40,7 @@ namespace translitor
 
         [DllImport("user32.dll")]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-        private const int MOD_ALT = 0x0001;
-        private const int MOD_SHIFT = 0x0004;
-
         private const int WM_HOTKEY = 0x0312;
-
         private const int HOTKEY_ID = 1;
         protected override void WndProc(ref Message m)
         {
@@ -50,7 +50,6 @@ namespace translitor
 
                 if (id == HOTKEY_ID)
                 {
-                    //perform hotkey action
                     Thread.Sleep(300);
                     translite();
                 }
@@ -82,18 +81,27 @@ namespace translitor
 
         public static string GetSelectedText()
         {
-            SendKeys.SendWait("^c");
-            Thread.Sleep(100);
-            if (OpenClipboard(IntPtr.Zero))
+            try
             {
-                // Получаем данные из буфера обмена
-                IntPtr hClipboardData = GetClipboardData(CF_TEXT);
-                if (hClipboardData != IntPtr.Zero)
+                SendKeys.SendWait("^c");
+                Thread.Sleep(100);
+                if (OpenClipboard(IntPtr.Zero))
                 {
-                    string selectedText = Marshal.PtrToStringAnsi(hClipboardData);
-                    CloseClipboard();
-                    return selectedText;
+                    IntPtr hClipboardData = GetClipboardData(CF_TEXT);
+                    if (hClipboardData != IntPtr.Zero)
+                    {
+                        string selectedText = Marshal.PtrToStringAnsi(hClipboardData);
+                        return selectedText;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка при getselectedtext:");
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
                 CloseClipboard();
             }
             return string.Empty;
@@ -107,24 +115,24 @@ namespace translitor
             {'q','й'}, {'w','ц'}, {'e','у'}, {'r','к'}, {'t','е'}, {'y','н'}, {'u','г'}, {'i','ш'}, {'o','щ'}, {'p','з'}, {'[','х'},{']','ъ'},
             {'a','ф'}, {'s','ы'}, {'d','в'}, {'f','а'}, {'g','п'}, {'h','р'}, {'j','о'}, {'k','л'}, {'l','д'}, {';','ж'}, {'\'','э'},
             {'z','я'}, {'x','ч'}, {'c','с'}, {'v','м'}, {'b','и'}, {'n','т'}, {'m','ь'}, {',','б'}, {'.','ю'}, {'/','.'}, {'?',','},
-            {'@','"'}, {'#','№'}, {'$',';'}, {'^',':'}, {'&','?'}, {' ',' '},
+            {'@','"'}, {'#','№'}, {'$',';'}, {'^',':'}, {'&','?'}, {' ',' '}, {'`','ё'}, {'~','Ё'},
             {'Q','Й'}, {'W','Ц'}, {'E','У'}, {'R','К'}, {'T','Е'}, {'Y','Н'}, {'U','Г'}, {'I','Ш'}, {'O','Щ'}, {'P','З'}, {'{','Х'}, {'}','Ъ'},
             {'A','Ф'}, {'S','Ы'}, {'D','В'}, {'F','А'}, {'G','П'}, {'H','Р'}, {'J','О'}, {'K','Л'}, {'L','Д'}, {':','Ж'}, {'"','Э'}, 
             {'Z','Я'}, {'X','Ч'}, {'C','С'}, {'V','М'}, {'B','И'}, {'N','Т'}, {'M','Ь'}, {'<','Б'}, {'>','Ю'}
         };
 
-            char[] correctedChars = new char[text.Length];
-            for (int i = 0; i < text.Length; i++)
+            StringBuilder correctedText = new StringBuilder(text.Length);
+            foreach (char c in text)
             {
-                correctedChars[i] = dictionary.ContainsKey(text[i]) ? dictionary[text[i]] : text[i];
+                correctedText.Append(dictionary.TryGetValue(c, out char correctedChar) ? correctedChar : c);
             }
 
-            return new string(correctedChars);
+            return correctedText.ToString();
         }
         private void translite()
         {
             string text = GetSelectedText();
-            if (text != string.Empty)
+            if (!string.IsNullOrEmpty(text))
             {
                 text = CorrectText(text);
                 tbConclusion.Text = text;
@@ -138,7 +146,7 @@ namespace translitor
             }
         }
         #endregion
-        #region функционал
+        #region функционал формы
         // трей
         private void MainForm_Deactivate(object sender, EventArgs e)
         {
@@ -150,17 +158,16 @@ namespace translitor
 
         private void notifyIcon_DoubleClick(object sender, EventArgs e)
         {
+            if(this.WindowState == FormWindowState.Minimized)
+            {
+                this.ShowInTaskbar = true;
+                this.WindowState = FormWindowState.Normal;
+            }
             this.Show();
         }
         private void выйтиToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-        // Передвижение окна (пока что не работает)
-        private void MainForm_MouseDown(object sender, MouseEventArgs e)
-        {
-            Message m = Message.Create(base.Handle, 0xa1, new IntPtr(2), IntPtr.Zero);
-            this.WndProc(ref m);
         }
         // кнопка свернуть
         private void btnMinimize_Click(object sender, EventArgs e)
@@ -168,5 +175,35 @@ namespace translitor
             this.Hide();
         }
         #endregion
+
+        private void настройкиToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingsForm settingsForm = new SettingsForm();
+            settingsForm.SettingsChanged += LoadHotkeySettings;
+            settingsForm.ShowDialog();
+        }
+        private void LoadHotkeySettings()
+        {
+            int modifiers = Properties.Settings.Default.Modifiers;
+            Keys key = (Keys)Properties.Settings.Default.Key;
+            string modifiersNames = GetModifierNames(modifiers); 
+
+            label1.Text = $"1. Выделите нужный текст 2. Нажмите: {modifiersNames}+{key}";
+
+            RegisterHotKey(Handle, HOTKEY_ID, modifiers, (int)key);
+        }
+        private string GetModifierNames(int modifiers)
+        {
+            List<string> modifierNames = new List<string>();
+
+            if ((modifiers & 0x0001) != 0)
+                modifierNames.Add("Alt");
+            if ((modifiers & 0x0002) != 0)
+                modifierNames.Add("Ctrl");
+            if ((modifiers & 0x0004) != 0)
+                modifierNames.Add("Shift");
+
+            return string.Join(" + ", modifierNames);
+        }
     }
 }
