@@ -154,6 +154,7 @@ namespace translitor
             {
                 this.ShowInTaskbar = false;
             }
+            this.Hide();
         }
 
         private void notifyIcon_DoubleClick(object sender, EventArgs e)
