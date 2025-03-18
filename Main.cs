@@ -28,7 +28,7 @@ namespace translitor
         {
             if (Properties.Settings.Default.Modifiers == 0 && Properties.Settings.Default.Key == 0)
             {
-                Properties.Settings.Default.Modifiers = (int)(Keys.Shift | Keys.Alt);
+                Properties.Settings.Default.Modifiers = (0x0001 | 0x0002);
                 Properties.Settings.Default.Key = (int)Keys.P;
                 Properties.Settings.Default.Save();
             }
