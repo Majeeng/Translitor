@@ -44,9 +44,9 @@
             this.cbShift.AutoSize = true;
             this.cbShift.Location = new System.Drawing.Point(12, 12);
             this.cbShift.Name = "cbShift";
-            this.cbShift.Size = new System.Drawing.Size(47, 17);
+            this.cbShift.Size = new System.Drawing.Size(38, 17);
             this.cbShift.TabIndex = 0;
-            this.cbShift.Text = "Shift";
+            this.cbShift.Text = "Alt";
             this.cbShift.UseVisualStyleBackColor = true;
             // 
             // cbAlt
@@ -54,9 +54,9 @@
             this.cbAlt.AutoSize = true;
             this.cbAlt.Location = new System.Drawing.Point(12, 35);
             this.cbAlt.Name = "cbAlt";
-            this.cbAlt.Size = new System.Drawing.Size(38, 17);
+            this.cbAlt.Size = new System.Drawing.Size(47, 17);
             this.cbAlt.TabIndex = 0;
-            this.cbAlt.Text = "Alt";
+            this.cbAlt.Text = "Shift";
             this.cbAlt.UseVisualStyleBackColor = true;
             // 
             // cbCtrl

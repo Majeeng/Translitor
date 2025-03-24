@@ -57,6 +57,29 @@ namespace translitor
 
             base.WndProc(ref m);
         }
+        private void LoadHotkeySettings()
+        {
+            int modifiers = Properties.Settings.Default.Modifiers;
+            Keys key = (Keys)Properties.Settings.Default.Key;
+            string modifiersNames = GetModifierNames(modifiers);
+
+            label1.Text = $"1. Выделите нужный текст 2. Нажмите: {modifiersNames}+{key}";
+
+            RegisterHotKey(Handle, HOTKEY_ID, modifiers, (int)key);
+        }
+        private string GetModifierNames(int modifiers)
+        {
+            List<string> modifierNames = new List<string>();
+
+            if ((modifiers & 0x0001) != 0)
+                modifierNames.Add("Alt");
+            if ((modifiers & 0x0002) != 0)
+                modifierNames.Add("Ctrl");
+            if ((modifiers & 0x0004) != 0)
+                modifierNames.Add("Shift");
+
+            return string.Join(" + ", modifierNames);
+        }
         #endregion
 
         SoundPlayer sp = new SoundPlayer(Properties.Resources.empty);
@@ -146,65 +169,32 @@ namespace translitor
             }
         }
         #endregion
-        #region функционал формы
-        // трей
-        private void MainForm_Deactivate(object sender, EventArgs e)
-        {
-            if (this.WindowState == FormWindowState.Minimized)
-            {
-                this.ShowInTaskbar = false;
-            }
-            this.Hide();
-        }
 
+        #region Tray
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            if (WindowState == FormWindowState.Minimized)
+            {
+                Hide();
+            }
+        }
         private void notifyIcon_DoubleClick(object sender, EventArgs e)
         {
-            if(this.WindowState == FormWindowState.Minimized)
-            {
-                this.ShowInTaskbar = true;
-                this.WindowState = FormWindowState.Normal;
-            }
-            this.Show();
+            Show();
+            WindowState = FormWindowState.Normal;
+            this.ShowInTaskbar = true;
         }
-        private void выйтиToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Close_ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
         }
-        // кнопка свернуть
-        private void btnMinimize_Click(object sender, EventArgs e)
-        {
-            this.Hide();
-        }
         #endregion
 
-        private void настройкиToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Settings_ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SettingsForm settingsForm = new SettingsForm();
             settingsForm.SettingsChanged += LoadHotkeySettings;
             settingsForm.ShowDialog();
-        }
-        private void LoadHotkeySettings()
-        {
-            int modifiers = Properties.Settings.Default.Modifiers;
-            Keys key = (Keys)Properties.Settings.Default.Key;
-            string modifiersNames = GetModifierNames(modifiers); 
-
-            label1.Text = $"1. Выделите нужный текст 2. Нажмите: {modifiersNames}+{key}";
-
-            RegisterHotKey(Handle, HOTKEY_ID, modifiers, (int)key);
-        }
-        private string GetModifierNames(int modifiers)
-        {
-            List<string> modifierNames = new List<string>();
-
-            if ((modifiers & 0x0001) != 0)
-                modifierNames.Add("Alt");
-            if ((modifiers & 0x0002) != 0)
-                modifierNames.Add("Ctrl");
-            if ((modifiers & 0x0004) != 0)
-                modifierNames.Add("Shift");
-
-            return string.Join(" + ", modifierNames);
         }
     }
 }

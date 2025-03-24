@@ -65,14 +65,14 @@ namespace translitor
             this.настройкиToolStripMenuItem.Name = "настройкиToolStripMenuItem";
             this.настройкиToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.настройкиToolStripMenuItem.Text = "Настройки";
-            this.настройкиToolStripMenuItem.Click += new System.EventHandler(this.настройкиToolStripMenuItem_Click);
+            this.настройкиToolStripMenuItem.Click += new System.EventHandler(this.Settings_ToolStripMenuItem_Click);
             // 
             // выйтиToolStripMenuItem
             // 
             this.выйтиToolStripMenuItem.Name = "выйтиToolStripMenuItem";
             this.выйтиToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.выйтиToolStripMenuItem.Text = "Закрыть";
-            this.выйтиToolStripMenuItem.Click += new System.EventHandler(this.выйтиToolStripMenuItem_Click);
+            this.выйтиToolStripMenuItem.Click += new System.EventHandler(this.Close_ToolStripMenuItem_Click);
             // 
             // tbConclusion
             // 
@@ -108,7 +108,7 @@ namespace translitor
             this.настройкиToolStripMenuItem1.Name = "настройкиToolStripMenuItem1";
             this.настройкиToolStripMenuItem1.Size = new System.Drawing.Size(79, 20);
             this.настройкиToolStripMenuItem1.Text = "Настройки";
-            this.настройкиToolStripMenuItem1.Click += new System.EventHandler(this.настройкиToolStripMenuItem_Click);
+            this.настройкиToolStripMenuItem1.Click += new System.EventHandler(this.Settings_ToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -125,7 +125,7 @@ namespace translitor
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Deactivate += new System.EventHandler(this.MainForm_Deactivate);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.contextMenuStrip.ResumeLayout(false);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
